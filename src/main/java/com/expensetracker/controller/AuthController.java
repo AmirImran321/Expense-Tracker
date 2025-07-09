@@ -3,7 +3,6 @@ package com.expensetracker.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -14,22 +13,20 @@ import com.expensetracker.service.UserService;
 import com.expensetracker.model.RevokedToken;
 import com.expensetracker.model.User;
 import com.expensetracker.repository.RevokedTokenRepository;
-import com.expensetracker.security.JwtUtil;
 
-@Service
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
     private final RevokedTokenRepository revokedTokenRepository;
     
-    public AuthController(UserService userService, JwtUtil jwtUtil, RevokedTokenRepository revokedTokenRepository) {
+    public AuthController(UserService userService, RevokedTokenRepository revokedTokenRepository) {
         this.userService = userService;
-        this.jwtUtil = jwtUtil;
         this.revokedTokenRepository = revokedTokenRepository;
     }
+  
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {

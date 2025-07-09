@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.expensetracker.repository.RevokedTokenRepository;
-import com.expensetracker.security.JwtUtil;
 
 import java.io.IOException;
 
@@ -18,6 +17,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired private JwtUtil jwtUtil;
     @Autowired private RevokedTokenRepository revokedTokenRepository;
+    @Autowired private CustomUserDetailsService userDetailsService; // ✅ Inject your user details service
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -42,8 +42,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtUtil.validateToken(token)) {
                 String username = jwtUtil.getUsername(token);
+
+             
+                var userDetails = userDetailsService.loadUserByUsername(username);
+
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, null);
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
@@ -51,6 +56,4 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 }
-

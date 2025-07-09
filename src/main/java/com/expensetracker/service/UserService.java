@@ -1,6 +1,5 @@
 package com.expensetracker.service;
 import com.expensetracker.model.User;
-import com.expensetracker.model.Role;
 import com.expensetracker.repository.UserRepository;
 import com.expensetracker.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        if (user.getRole() == null) user.setRole(Role.ROLE_USER);
 
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully!");
@@ -34,7 +32,7 @@ public class UserService {
         return userRepository.findByUsername(user.getUsername())
             .filter(u -> passwordEncoder.matches(user.getPassword(), u.getPassword()))
             .map(u -> ResponseEntity.ok(Map.of(
-                "accessToken", jwtUtil.generateToken(u.getUsername(), u.getRole().name()),
+                "accessToken", jwtUtil.generateToken(u.getUsername()),
                 "refreshToken", jwtUtil.generateRefreshToken(u.getUsername())
             )))
             .orElse(ResponseEntity.status(401).body(
