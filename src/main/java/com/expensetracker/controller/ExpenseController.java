@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,13 +19,14 @@ import com.expensetracker.model.Expense;
 import com.expensetracker.service.ExpenseService;
 
 @RestController
-@RequestMapping("/expenses")
+@RequestMapping("/api/expenses")
 public class ExpenseController {
 
     @Autowired private ExpenseService expenseService;
+    
 
     @PostMapping
-    public ResponseEntity<Expense> createExpense(@RequestBody Expense expense, Principal principal) {
+    public Expense createExpense(@RequestBody Expense expense, Principal principal) {
         return expenseService.createExpense(expense, principal.getName());
     }
 
@@ -34,18 +36,23 @@ public class ExpenseController {
     }
     
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     public ResponseEntity<Expense> getExpenseById(@PathVariable Long id, Principal principal) {
-        Expense expense = expenseService.getExpenseById(id, principal.getName());
+        Expense expense = expenseService.getExpensesByUserId(id, principal.getName());
         return ResponseEntity.ok(expense);
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody Expense expense, Principal principal) {
-        return ResponseEntity.ok(expenseService.updateExpense(id, expense, principal.getName()));
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody Expense updatedExpense, Principal principal) {
+        Expense saved = expenseService.updateExpense(id, updatedExpense, principal.getName());
+        return ResponseEntity.ok(saved);
     }
 
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     public ResponseEntity<String> deleteExpense(@PathVariable Long id, Principal principal) {
         expenseService.deleteExpense(id, principal.getName());
         return ResponseEntity.ok("Expense deleted successfully!");

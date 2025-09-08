@@ -27,7 +27,6 @@ public class AuthController {
         this.revokedTokenRepository = revokedTokenRepository;
     }
   
-
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         return userService.register(user);
@@ -46,11 +45,11 @@ public class AuthController {
         }
 
         String accessToken = authHeader.substring(7);
-        revokedTokenRepository.save(new RevokedToken(accessToken)); // revoke access token
+        revokedTokenRepository.save(new RevokedToken(accessToken)); 
 
         String refreshToken = request.get("refreshToken");
         if (refreshToken != null && !refreshToken.isBlank()) {
-            revokedTokenRepository.save(new RevokedToken(refreshToken)); // revoke refresh token
+            revokedTokenRepository.save(new RevokedToken(refreshToken)); 
         }
 
         return ResponseEntity.ok("Logged out successfully!");
